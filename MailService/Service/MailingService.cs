@@ -39,11 +39,24 @@
             email.From.Add(new MailboxAddress(_mailSettings.SenderName, _mailSettings.SenderEmail));
 
             using var smtp = new SmtpClient();
-            smtp.Connect(_mailSettings.Server, _mailSettings.Port, SecureSocketOptions.StartTls);
-            smtp.Authenticate(_mailSettings.SenderEmail, _mailSettings.Password);
+            try
+            {
+                smtp.Connect(_mailSettings.Server, _mailSettings.Port, SecureSocketOptions.StartTls);
+                smtp.AuthenticationMechanisms.Remove("XOAUTH2");
+                smtp.Authenticate(_mailSettings.SenderEmail, _mailSettings.Password);
+                await smtp.SendAsync(email);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                smtp.Disconnect(true);
+                smtp.Dispose();
+            }
 
-            await smtp.SendAsync(email);
-            smtp.Disconnect(true);
+            //smtp.Disconnect(true);
         }
     }
 }
