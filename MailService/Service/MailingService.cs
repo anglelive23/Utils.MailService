@@ -9,6 +9,7 @@
         }
         public async Task SendMailAsync(string mailTo, string subject, string body, IList<IFormFile> attatchments = null)
         {
+            // Email
             var email = new MimeMessage
             {
                 Sender = MailboxAddress.Parse(_mailSettings.SenderEmail),
@@ -17,6 +18,7 @@
 
             email.To.Add(MailboxAddress.Parse(mailTo));
 
+            // Message body
             var builder = new BodyBuilder();
             if(attatchments != null)
             {
@@ -33,11 +35,13 @@
                     }
                 }
             }
-
             builder.HtmlBody= body;
+
+            // Email Body
             email.Body = builder.ToMessageBody();
             email.From.Add(new MailboxAddress(_mailSettings.SenderName, _mailSettings.SenderEmail));
 
+            // Sending Email
             using var smtp = new SmtpClient();
             try
             {
@@ -55,8 +59,6 @@
                 smtp.Disconnect(true);
                 smtp.Dispose();
             }
-
-            //smtp.Disconnect(true);
         }
     }
 }
